@@ -1,0 +1,506 @@
+
+
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloc de Notas - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 900px;
+        width: 100%;
+    }
+
+    .login-container, .notepad-container {
+        padding: 40px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    h1 {
+        color: #333;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .error-message {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .success-message {
+        color: #27ae60;
+        font-size: 14px;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .logout-btn {
+        width: auto;
+        padding: 8px 20px;
+        background: #e74c3c;
+        font-size: 14px;
+    }
+
+    .notes-list {
+        margin-bottom: 30px;
+    }
+
+    .note-item {
+        background: #f8f9fa;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .note-item:hover {
+        background: #e9ecef;
+    }
+
+    .note-item h3 {
+        color: #333;
+        margin-bottom: 5px;
+        font-size: 18px;
+    }
+
+    .note-item p {
+        color: #666;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .note-item small {
+        color: #999;
+        font-size: 12px;
+    }
+
+    .note-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .note-actions button {
+        width: auto;
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    .delete-btn {
+        background: #e74c3c;
+    }
+
+    .edit-btn {
+        background: #3498db;
+    }
+
+    textarea {
+        min-height: 200px;
+        resize: vertical;
+    }
+
+    .new-note-btn {
+        margin-bottom: 20px;
+        background: #27ae60;
+    }
+
+    .save-btn {
+        background: #27ae60;
+    }
+
+    .cancel-btn {
+        background: #95a5a6;
+        margin-top: 10px;
+    }
+
+    .editor {
+        display: none;
+    }
+
+    .editor.active {
+        display: block;
+    }
+
+    .sync-status {
+        text-align: center;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .sync-status.connected {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .sync-status.disconnected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="loginContainer" class="login-container">
+            <h1>🔐 Bloc de Notas</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Iniciar Sesión</button>
+                <div id="errorMessage" class="error-message"></div>
+            </form>
+        </div>
+
+```
+    <!-- Notepad Interface -->
+    <div id="notepadContainer" class="notepad-container hidden">
+        <div class="header">
+            <h1>📝 Mis Notas</h1>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+
+        <div id="syncStatus" class="sync-status connected">
+            ✅ Sincronizado con la nube
+        </div>
+
+        <button class="new-note-btn" onclick="showEditor()">+ Nueva Nota</button>
+
+        <!-- Editor -->
+        <div id="editor" class="editor">
+            <div class="form-group">
+                <label for="noteTitle">Título</label>
+                <input type="text" id="noteTitle" placeholder="Título de la nota">
+            </div>
+            <div class="form-group">
+                <label for="noteContent">Contenido</label>
+                <textarea id="noteContent" placeholder="Escribe tu nota aquí..."></textarea>
+            </div>
+            <button class="save-btn" onclick="saveNote()">Guardar Nota</button>
+            <button class="cancel-btn" onclick="cancelEdit()">Cancelar</button>
+        </div>
+
+        <!-- Notes List -->
+        <div id="notesList" class="notes-list">
+            <div class="loading">Cargando notas...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getDatabase, ref, push, set, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+    // ⚠️ IMPORTANTE: Reemplaza con tu configuración de Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyDCKlkJKrDWnBMIxyhbEhyyXZPGrZggcdQ",
+        authDomain: "bloc-notas-a5f63.firebaseapp.com",
+        databaseURL: "https://bloc-notas-a5f63-default-rtdb.firebaseio.com",
+        projectId: "bloc-notas-a5f63",
+        storageBucket: "bloc-notas-a5f63.firebasestorage.app",
+        messagingSenderId: "911315527082",
+        appId: "1:911315527082:web:886f930fb3e23518c8f7d3"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const notesRef = ref(database, 'notes');
+
+    // Variables globales
+    window.currentEditId = null;
+    window.firebaseDb = database;
+
+    // Credenciales de login
+    const ADMIN_USER = 'Administrador';
+    const ADMIN_PASS = '#Temp123#';
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMsg = document.getElementById('errorMessage');
+
+        if (username === ADMIN_USER && password === ADMIN_PASS) {
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('notepadContainer').classList.remove('hidden');
+            sessionStorage.setItem('loggedIn', 'true');
+            loadNotes();
+            errorMsg.textContent = '';
+        } else {
+            errorMsg.textContent = 'Usuario o contraseña incorrectos';
+        }
+    });
+
+    // Cargar notas desde Firebase
+    function loadNotes() {
+        onValue(notesRef, (snapshot) => {
+            const data = snapshot.val();
+            const notesList = document.getElementById('notesList');
+            
+            if (!data) {
+                notesList.innerHTML = '<p style="text-align: center; color: #999;">No hay notas guardadas. ¡Crea tu primera nota!</p>';
+                updateSyncStatus(true);
+                return;
+            }
+
+            const notesArray = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            })).sort((a, b) => new Date(b.updated) - new Date(a.updated));
+
+            renderNotes(notesArray);
+            updateSyncStatus(true);
+        }, (error) => {
+            console.error('Error al cargar notas:', error);
+            updateSyncStatus(false);
+        });
+    }
+
+    // Renderizar notas
+    function renderNotes(notes) {
+        const notesList = document.getElementById('notesList');
+        
+        notesList.innerHTML = notes.map(note => `
+            <div class="note-item">
+                <h3>${escapeHtml(note.title)}</h3>
+                <p>${escapeHtml(note.content)}</p>
+                <small>Última actualización: ${new Date(note.updated).toLocaleString('es-ES')}</small>
+                <div class="note-actions">
+                    <button class="edit-btn" onclick="editNote('${note.id}', '${escapeHtml(note.title)}', '${escapeHtml(note.content)}')">Editar</button>
+                    <button class="delete-btn" onclick="deleteNote('${note.id}')">Eliminar</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Actualizar estado de sincronización
+    function updateSyncStatus(connected) {
+        const status = document.getElementById('syncStatus');
+        if (connected) {
+            status.className = 'sync-status connected';
+            status.textContent = '✅ Sincronizado con la nube';
+        } else {
+            status.className = 'sync-status disconnected';
+            status.textContent = '❌ Error de sincronización';
+        }
+    }
+
+    // Escape HTML para prevenir XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Mostrar editor
+    window.showEditor = function(note = null) {
+        const editor = document.getElementById('editor');
+        const titleInput = document.getElementById('noteTitle');
+        const contentInput = document.getElementById('noteContent');
+
+        if (note) {
+            window.currentEditId = note.id;
+            titleInput.value = note.title;
+            contentInput.value = note.content;
+        } else {
+            window.currentEditId = null;
+            titleInput.value = '';
+            contentInput.value = '';
+        }
+
+        editor.classList.add('active');
+    };
+
+    // Editar nota
+    window.editNote = function(id, title, content) {
+        window.showEditor({ id, title, content });
+    };
+
+    // Cancelar edición
+    window.cancelEdit = function() {
+        document.getElementById('editor').classList.remove('active');
+        window.currentEditId = null;
+    };
+
+    // Guardar nota
+    window.saveNote = async function() {
+        const title = document.getElementById('noteTitle').value.trim();
+        const content = document.getElementById('noteContent').value.trim();
+
+        if (!title || !content) {
+            alert('Por favor completa el título y contenido');
+            return;
+        }
+
+        const noteData = {
+            title,
+            content,
+            updated: new Date().toISOString()
+        };
+
+        try {
+            if (window.currentEditId) {
+                // Actualizar nota existente
+                const noteRef = ref(database, `notes/${window.currentEditId}`);
+                await update(noteRef, noteData);
+            } else {
+                // Crear nueva nota
+                noteData.created = new Date().toISOString();
+                await push(notesRef, noteData);
+            }
+            window.cancelEdit();
+        } catch (error) {
+            console.error('Error al guardar:', error);
+            alert('Error al guardar la nota');
+        }
+    };
+
+    // Eliminar nota
+    window.deleteNote = async function(id) {
+        if (confirm('¿Estás seguro de eliminar esta nota?')) {
+            try {
+                const noteRef = ref(database, `notes/${id}`);
+                await remove(noteRef);
+            } catch (error) {
+                console.error('Error al eliminar:', error);
+                alert('Error al eliminar la nota');
+            }
+        }
+    };
+
+    // Logout
+    window.logout = function() {
+        sessionStorage.removeItem('loggedIn');
+        document.getElementById('loginContainer').classList.remove('hidden');
+        document.getElementById('notepadContainer').classList.add('hidden');
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+    };
+
+    // Verificar sesión al cargar
+    window.addEventListener('load', function() {
+        if (sessionStorage.getItem('loggedIn') === 'true') {
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('notepadContainer').classList.remove('hidden');
+            loadNotes();
+        }
+    });
+</script>
+```
+
+</body>
+</html>
